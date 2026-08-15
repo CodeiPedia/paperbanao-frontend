@@ -1,0 +1,127 @@
+"use client";
+import { useEffect, useState } from "react";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import Navbar from "@/components/Navbar";
+import { SkeletonForm } from "@/components/Skeleton";
+import { useToast } from "@/context/ToastContext";
+import { api } from "@/lib/api";
+
+export default function InstitutionSettingsPage() {
+  const [instName, setInstName] = useState("");
+  const [instAddress, setInstAddress] = useState("");
+  const [instContact, setInstContact] = useState("");
+  const [teacherName, setTeacherName] = useState("");
+  const [language, setLanguage] = useState("English");
+  const [boardFormat, setBoardFormat] = useState("Standard");
+  const [logoFile, setLogoFile] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const { showToast } = useToast();
+
+  useEffect(() => {
+    api.getInstitutionDefaults()
+      .then((d) => {
+        setInstName(d.default_inst_name || "");
+        setInstAddress(d.default_inst_address || "");
+        setInstContact(d.default_inst_contact || "");
+        setTeacherName(d.default_teacher_name || "");
+        setLanguage(d.default_paper_language || "English");
+        setBoardFormat(d.default_board_format || "Standard");
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  const handleSave = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      const formData = new FormData();
+      formData.append("inst_name", instName);
+      formData.append("inst_address", instAddress);
+      formData.append("inst_contact", instContact);
+      formData.append("teacher_name", teacherName);
+      formData.append("paper_language", language);
+      formData.append("board_format", boardFormat);
+      if (logoFile) formData.append("logo", logoFile);
+
+      await api.saveInstitutionDefaults(formData);
+      showToast("Saved! These will auto-fill on every paper you generate or export.", "success");
+    } catch (err) {
+      showToast(err.message, "error");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <ProtectedRoute>
+      <Navbar />
+      <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-8">
+        <div className="eyebrow mb-1">Your letterhead</div>
+        <h1 className="mb-2 text-2xl">Institute Details</h1>
+        <p className="mb-6 text-sm text-slate-500">
+          Save your letterhead once — every paper you generate or export will use it automatically.
+        </p>
+
+        {loading ? (
+          <SkeletonForm rows={5} />
+        ) : (
+          <form onSubmit={handleSave} className="card space-y-4">
+            <div>
+              <label className="mb-1 block text-sm font-medium">Institute Name</label>
+              <input className="input-field" value={instName} onChange={(e) => setInstName(e.target.value)} />
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium">Address</label>
+              <input className="input-field" value={instAddress} onChange={(e) => setInstAddress(e.target.value)} />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="mb-1 block text-sm font-medium">Contact Number</label>
+                <input className="input-field" value={instContact} onChange={(e) => setInstContact(e.target.value)} />
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium">Teacher Name</label>
+                <input className="input-field" value={teacherName} onChange={(e) => setTeacherName(e.target.value)} />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="mb-1 block text-sm font-medium">Default Language</label>
+                <select className="input-field" value={language} onChange={(e) => setLanguage(e.target.value)}>
+                  <option>English</option>
+                  <option>Hindi</option>
+                  <option>Bilingual</option>
+                </select>
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium">Board Pattern</label>
+                <select className="input-field" value={boardFormat} onChange={(e) => setBoardFormat(e.target.value)}>
+                  <option>Standard</option>
+                  <option>BSEB (Bihar Board)</option>
+                  <option>CBSE</option>
+                  <option>ICSE</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium">Logo</label>
+              <input
+                type="file"
+                accept="image/png,image/jpeg"
+                onChange={(e) => setLogoFile(e.target.files?.[0] || null)}
+                className="file-input-btn"
+              />
+              <p className="mt-1 text-xs text-slate-400">Leave empty to keep your current saved logo.</p>
+            </div>
+
+            <button type="submit" disabled={saving} className="btn-primary w-full">
+              {saving ? "Saving..." : "💾 Save Defaults"}
+            </button>
+          </form>
+        )}
+      </main>
+    </ProtectedRoute>
+  );
+}
