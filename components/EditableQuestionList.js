@@ -14,6 +14,9 @@ export default function EditableQuestionList({ blocks, setBlocks, subject, topic
   const [regeneratingIndex, setRegeneratingIndex] = useState(null);
   const [error, setError] = useState("");
 
+  const answerKeyIndex = blocks.findIndex((b) => b.toUpperCase().includes("ANSWER KEY"));
+  const isInAnswerKeySection = (i) => answerKeyIndex !== -1 && i >= answerKeyIndex;
+
   const updateBlock = (i, text) => {
     setBlocks((prev) => prev.map((b, idx) => (idx === i ? text : b)));
   };
@@ -67,14 +70,16 @@ export default function EditableQuestionList({ blocks, setBlocks, subject, topic
               value={b}
               onChange={(e) => updateBlock(i, e.target.value)}
             />
-            <button
-              type="button"
-              onClick={() => handleRegenerate(i)}
-              disabled={regeneratingIndex !== null}
-              className="whitespace-nowrap rounded border border-slate-300 px-2 py-1.5 text-xs hover:bg-slate-50"
-            >
-              {regeneratingIndex === i ? "..." : "🔄 Regenerate"}
-            </button>
+            {!isInAnswerKeySection(i) && (
+              <button
+                type="button"
+                onClick={() => handleRegenerate(i)}
+                disabled={regeneratingIndex !== null}
+                className="whitespace-nowrap rounded border border-slate-300 px-2 py-1.5 text-xs hover:bg-slate-50"
+              >
+                {regeneratingIndex === i ? "..." : "🔄 Regenerate"}
+              </button>
+            )}
           </div>
         ))}
       </div>
