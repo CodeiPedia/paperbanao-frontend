@@ -130,9 +130,15 @@ export default function LandingPage() {
             <p className="text-sm text-slate-500">5 question papers to try, no card required.</p>
           </div>
           <div className="plan-card pro">
-            <div className="tag">Pro — 30 Days</div>
-            <div className="price">₹99 <span className="text-base text-slate-500">/ 30 days</span></div>
+            <div className="flex items-center gap-2">
+              <span className="tag">Pro — 30 Days</span>
+              <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-bold text-amber-700">50% OFF</span>
+            </div>
+            <div className="price">
+              ₹99 <span className="text-lg text-slate-400 line-through">₹199</span> <span className="text-base text-slate-500">/ 30 days</span>
+            </div>
             <p className="text-sm text-slate-500">Unlimited papers for 30 days. One-time payment.</p>
+            <p className="mt-1 text-xs italic text-slate-400">Cheaper than a pizza. 🍕</p>
           </div>
         </div>
         <div className="mt-6 text-center">

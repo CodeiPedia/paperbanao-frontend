@@ -59,10 +59,16 @@ function UpgradeContent() {
       )}
 
       <div className="card">
-        <div className="mb-1 text-xs font-mono uppercase text-slate-500">Pro — 30 Days</div>
-        <div className="mb-3 font-serif text-3xl text-[#17263D]">
-          ₹99 <span className="text-base text-slate-500">/ 30 days</span>
+        <div className="mb-1 flex items-center gap-2">
+          <span className="text-xs font-mono uppercase text-slate-500">Pro — 30 Days</span>
+          <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-bold text-amber-700">50% OFF</span>
         </div>
+        <div className="mb-1 flex items-baseline gap-2">
+          <span className="font-serif text-3xl text-[#17263D]">₹99</span>
+          <span className="text-lg text-slate-400 line-through">₹199</span>
+          <span className="text-base text-slate-500">/ 30 days</span>
+        </div>
+        <p className="mb-4 text-xs italic text-slate-400">Cheaper than a pizza. 🍕</p>
         <ul className="mb-5 space-y-1 text-sm text-slate-600">
           <li>✓ Unlimited question papers</li>
           <li>✓ Unlimited digitization</li>
