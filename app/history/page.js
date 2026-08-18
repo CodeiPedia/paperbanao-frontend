@@ -63,7 +63,7 @@ export default function HistoryPage() {
         <div className="space-y-3">
           {papers.map((p) => (
             <div key={p.id} className="card">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <h3 className="text-base font-semibold">{p.subject}</h3>
                   <p className="text-xs text-slate-500">{p.date} · {p.board}</p>

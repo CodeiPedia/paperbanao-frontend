@@ -85,7 +85,7 @@ export default function DigitizePage() {
               className="file-input-btn"
             />
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="mb-1 block text-sm font-medium">Subject</label>
               <input className="input-field" value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="e.g. Mathematics" />

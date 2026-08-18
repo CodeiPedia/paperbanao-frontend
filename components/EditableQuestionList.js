@@ -63,7 +63,7 @@ export default function EditableQuestionList({ blocks, setBlocks, subject, topic
       {error && <p className="msg-error mb-3">{error}</p>}
       <div className="space-y-3">
         {blocks.map((b, i) => (
-          <div key={i} className="flex items-start gap-2">
+          <div key={i} className="flex flex-col gap-2 sm:flex-row sm:items-start">
             <textarea
               className="input-field flex-1"
               rows={3}
@@ -75,7 +75,7 @@ export default function EditableQuestionList({ blocks, setBlocks, subject, topic
                 type="button"
                 onClick={() => handleRegenerate(i)}
                 disabled={regeneratingIndex !== null}
-                className="whitespace-nowrap rounded border border-slate-300 px-2 py-1.5 text-xs hover:bg-slate-50"
+                className="whitespace-nowrap rounded border border-slate-300 px-2 py-1.5 text-xs hover:bg-slate-50 sm:self-start"
               >
                 {regeneratingIndex === i ? "..." : "🔄 Regenerate"}
               </button>

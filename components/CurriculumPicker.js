@@ -80,7 +80,7 @@ export default function CurriculumPicker({ onTopicsChange, onSelectionChange }) 
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
           <label className="mb-1 block text-sm font-medium">Class</label>
           <select className="input-field" value={selectedClass} onChange={(e) => setSelectedClass(e.target.value)}>

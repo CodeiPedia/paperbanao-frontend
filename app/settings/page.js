@@ -82,7 +82,7 @@ export default function InstitutionSettingsPage() {
               <label className="mb-1 block text-sm font-medium">Address</label>
               <input className="input-field" value={instAddress} onChange={(e) => setInstAddress(e.target.value)} />
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="mb-1 block text-sm font-medium">Contact Number</label>
                 <input className="input-field" value={instContact} onChange={(e) => setInstContact(e.target.value)} />
@@ -92,7 +92,7 @@ export default function InstitutionSettingsPage() {
                 <input className="input-field" value={teacherName} onChange={(e) => setTeacherName(e.target.value)} />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="mb-1 block text-sm font-medium">Default Language</label>
                 <select className="input-field" value={language} onChange={(e) => setLanguage(e.target.value)}>

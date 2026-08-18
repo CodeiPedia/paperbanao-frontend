@@ -155,7 +155,7 @@ export default function DashboardPage() {
                   className="file-input-btn"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="mb-1 block text-sm font-medium">Start Page</label>
                   <input type="number" min={1} className="input-field" value={startPage} onChange={(e) => setStartPage(Number(e.target.value))} />
@@ -177,7 +177,7 @@ export default function DashboardPage() {
             </div>
           )}
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="mb-1 block text-sm font-medium">Subject {method === "pdf" ? "(PDF)" : ""}</label>
               <input className="input-field" value={subject} onChange={(e) => setSubject(e.target.value)} required />
@@ -195,7 +195,7 @@ export default function DashboardPage() {
             <textarea className="input-field" rows={2} value={topics} onChange={(e) => setTopics(e.target.value)} />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="mb-1 block text-sm font-medium">Language</label>
               <select className="input-field" value={language} onChange={(e) => setLanguage(e.target.value)}>

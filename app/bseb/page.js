@@ -122,7 +122,7 @@ export default function BsebBoardPage() {
 
           <div className="card">
             <h2 className="mb-3 text-base font-semibold text-[#17263D]">3. Language &amp; Answer Key</h2>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="mb-1 block text-sm font-medium">Language</label>
                 <select className="input-field" value={language} onChange={(e) => setLanguage(e.target.value)}>
