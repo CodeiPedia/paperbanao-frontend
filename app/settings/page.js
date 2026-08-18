@@ -13,6 +13,8 @@ export default function InstitutionSettingsPage() {
   const [teacherName, setTeacherName] = useState("");
   const [language, setLanguage] = useState("English");
   const [boardFormat, setBoardFormat] = useState("Standard");
+  const [customInstructions, setCustomInstructions] = useState("");
+  const [readingTime, setReadingTime] = useState("");
   const [logoFile, setLogoFile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -27,6 +29,8 @@ export default function InstitutionSettingsPage() {
         setTeacherName(d.default_teacher_name || "");
         setLanguage(d.default_paper_language || "English");
         setBoardFormat(d.default_board_format || "Standard");
+        setCustomInstructions(d.default_custom_instructions || "");
+        setReadingTime(d.default_reading_time || "");
       })
       .catch(() => {})
       .finally(() => setLoading(false));
@@ -43,6 +47,8 @@ export default function InstitutionSettingsPage() {
       formData.append("teacher_name", teacherName);
       formData.append("paper_language", language);
       formData.append("board_format", boardFormat);
+      formData.append("custom_instructions", customInstructions);
+      formData.append("reading_time", readingTime);
       if (logoFile) formData.append("logo", logoFile);
 
       await api.saveInstitutionDefaults(formData);
@@ -114,6 +120,32 @@ export default function InstitutionSettingsPage() {
                 className="file-input-btn"
               />
               <p className="mt-1 text-xs text-slate-400">Leave empty to keep your current saved logo.</p>
+            </div>
+
+            <div className="border-t border-slate-200 pt-4">
+              <h2 className="mb-1 text-base font-semibold text-[#17263D]">Paper Format</h2>
+              <p className="mb-3 text-xs text-slate-400">Optional — shown at the top of every generated paper.</p>
+              <div className="space-y-3">
+                <div>
+                  <label className="mb-1 block text-sm font-medium">Custom Instructions</label>
+                  <textarea
+                    className="input-field"
+                    rows={2}
+                    placeholder="e.g. All questions are compulsory. Section A carries 20 marks."
+                    value={customInstructions}
+                    onChange={(e) => setCustomInstructions(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block text-sm font-medium">Reading Time (optional)</label>
+                  <input
+                    className="input-field"
+                    placeholder="e.g. 15 minutes"
+                    value={readingTime}
+                    onChange={(e) => setReadingTime(e.target.value)}
+                  />
+                </div>
+              </div>
             </div>
 
             <button type="submit" disabled={saving} className="btn-primary w-full">
