@@ -3,8 +3,12 @@ import { AuthProvider } from "@/context/AuthContext";
 import { ToastProvider } from "@/context/ToastContext";
 
 export const metadata = {
-  title: "PaperBanao — AI Question Paper Generator",
-  description: "Generate custom question papers in seconds, or digitize a handwritten paper.",
+  metadataBase: new URL("https://paperbanao.in"),
+  title: {
+    default: "PaperBanao — AI Question Paper Generator",
+    template: "%s | PaperBanao",
+  },
+  description: "Generate BSEB, CBSE, and NCERT-syllabus question papers in seconds, or digitize a handwritten paper.",
 };
 
 export default function RootLayout({ children }) {
