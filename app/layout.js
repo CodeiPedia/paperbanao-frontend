@@ -9,6 +9,9 @@ export const metadata = {
     template: "%s | PaperBanao",
   },
   description: "Generate BSEB, CBSE, and NCERT-syllabus question papers in seconds, or digitize a handwritten paper.",
+  verification: {
+    google: "xx8eqb4rEL73DJvMWGZyniuvRQK6_ROGsN5ZVpV-kFE",
+  },
 };
 
 export default function RootLayout({ children }) {
