@@ -9,6 +9,73 @@ function renderInline(text) {
   );
 }
 
+// Topics from the BSEB curriculum picker come formatted like
+// "Subject: Chapter A; Subject: Chapter B" (one "Subject: " prefix per
+// chapter, repeated). For the printed heading we only want the chapter
+// names, not the subject repeated in front of every single one.
+function formatTopicHeading(topics, subject) {
+  const raw = (topics || subject || "").trim();
+  if (!raw) return "";
+  const parts = raw.split(";").map((part) => {
+    const trimmed = part.trim();
+    const colonIdx = trimmed.indexOf(":");
+    return colonIdx > -1 ? trimmed.slice(colonIdx + 1).trim() : trimmed;
+  });
+  return parts.join("; ").toUpperCase();
+}
+
+function Letterhead({ instName, logoSrc, className, examTime, readingTime, marks, subject }) {
+  return (
+    <div className="letterhead-header">
+      <table className="letterhead-header-table">
+        <tbody>
+          <tr>
+            <td colSpan={3} style={{ textAlign: "center" }}>
+              <div className="letterhead-brand-row">
+                {logoSrc && <img src={logoSrc} alt="" className="letterhead-logo" />}
+                <h1 className="letterhead-name">{instName}</h1>
+              </div>
+            </td>
+          </tr>
+          <tr className="letterhead-meta-row">
+            <td className="letterhead-meta-left">
+              Class : {className || "—"}
+              <br />
+              Time : {examTime || "2 Hours"}
+              {readingTime ? ` (+ ${readingTime} reading time)` : ""}
+            </td>
+            <td className="letterhead-meta-center">
+              <span className="letterhead-badge">EXAMINATION</span>
+            </td>
+            <td className="letterhead-meta-right">
+              Sub.: {subject || "—"}
+              <br />
+              Marks: {marks || "—"}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function Footer({ instName, instAddress, instContact, teacherName }) {
+  if (!instAddress && !instContact && !teacherName) return null;
+  return (
+    <div className="letterhead-footer">
+      <strong>{instName}</strong>
+      {instAddress && <> | Address: {instAddress}</>}
+      {instContact && <> | Phone: {instContact}</>}
+      {teacherName && (
+        <>
+          {" "}
+          | Teacher: <strong>{teacherName}</strong>
+        </>
+      )}
+    </div>
+  );
+}
+
 export default function PaperPreview({
   blocks,
   subject,
@@ -33,87 +100,79 @@ export default function PaperPreview({
       ? `data:${institution.logoMimetype};base64,${institution.logoBase64}`
       : null;
 
-  const topicHeading = (topics || subject || "").toUpperCase();
+  const topicHeading = formatTopicHeading(topics, subject);
+  const footerProps = { instName, instAddress, instContact, teacherName };
 
   return (
     <div className="print-area">
       <div className="letterhead-page">
         <div className="letterhead-watermark">{instName}</div>
 
-        <div className="letterhead-header">
-          <table className="letterhead-header-table">
+        {/* Questions "page" — its own table so the footer (tfoot) reliably
+            repeats at the bottom of every physical printed page this
+            section spans, while the header above appears only once, at
+            the very top — not repeated per page. */}
+        <table className="letterhead-table">
+          <thead><tr><td /></tr></thead>
+          <tbody>
+            <tr>
+              <td>
+                <Letterhead
+                  instName={instName}
+                  logoSrc={logoSrc}
+                  className={className}
+                  examTime={examTime}
+                  readingTime={readingTime}
+                  marks={marks}
+                  subject={subject}
+                />
+                <div className="letterhead-section-bar">MULTIPLE CHOICE QUESTIONS &amp; THEORY</div>
+                {topicHeading && <h2 className="letterhead-topic-heading">{topicHeading}</h2>}
+                {customInstructions.trim() && (
+                  <div className="letterhead-instructions">
+                    <strong>Instructions:</strong> {customInstructions.trim()}
+                  </div>
+                )}
+                <div className="letterhead-content">
+                  {questionBlocks.map((b, i) => (
+                    <div key={i} className="letterhead-question">
+                      {renderInline(b)}
+                    </div>
+                  ))}
+                </div>
+              </td>
+            </tr>
+          </tbody>
+          <tfoot className="letterhead-tfoot">
+            <tr><td><Footer {...footerProps} /></td></tr>
+          </tfoot>
+        </table>
+
+        {/* Answer Key "page" — a separate table (page-break-before on the
+            table itself, not inside a row) with its own once-only header
+            and its own repeating footer. */}
+        {answerBlocks.length > 0 && (
+          <table className="letterhead-table letterhead-answer-table">
+            <thead><tr><td /></tr></thead>
             <tbody>
               <tr>
-                <td colSpan={3} style={{ textAlign: "center" }}>
-                  <div className="letterhead-brand-row">
-                    {logoSrc && <img src={logoSrc} alt="" className="letterhead-logo" />}
-                    <h1 className="letterhead-name">{instName}</h1>
+                <td>
+                  <div className="letterhead-simple-header">{instName}</div>
+                  <h2 className="letterhead-topic-heading letterhead-answer-heading">ANSWER KEY</h2>
+                  <div className="letterhead-content">
+                    {answerBlocks.map((b, i) => (
+                      <div key={i} className="letterhead-question">
+                        {renderInline(b)}
+                      </div>
+                    ))}
                   </div>
                 </td>
               </tr>
-              <tr className="letterhead-meta-row">
-                <td className="letterhead-meta-left">
-                  Class : {className || "—"}
-                  <br />
-                  Time : {examTime || "2 Hours"}
-                  {readingTime ? ` (+ ${readingTime} reading time)` : ""}
-                </td>
-                <td className="letterhead-meta-center">
-                  <span className="letterhead-badge">EXAMINATION</span>
-                </td>
-                <td className="letterhead-meta-right">
-                  Sub.: {subject || "—"}
-                  <br />
-                  Marks: {marks || "—"}
-                </td>
-              </tr>
             </tbody>
+            <tfoot className="letterhead-tfoot">
+              <tr><td><Footer {...footerProps} /></td></tr>
+            </tfoot>
           </table>
-        </div>
-
-        <div className="letterhead-section-bar">MULTIPLE CHOICE QUESTIONS &amp; THEORY</div>
-
-        {topicHeading && <h2 className="letterhead-topic-heading">{topicHeading}</h2>}
-
-        {customInstructions.trim() && (
-          <div className="letterhead-instructions">
-            <strong>Instructions:</strong> {customInstructions.trim()}
-          </div>
-        )}
-
-        <div className="letterhead-content">
-          {questionBlocks.map((b, i) => (
-            <div key={i} className="letterhead-question">
-              {renderInline(b)}
-            </div>
-          ))}
-        </div>
-
-        {answerBlocks.length > 0 && (
-          <div className="letterhead-answer-section">
-            <h2 className="letterhead-topic-heading letterhead-answer-heading">ANSWER KEY</h2>
-            <div className="letterhead-content">
-              {answerBlocks.map((b, i) => (
-                <div key={i} className="letterhead-question">
-                  {renderInline(b)}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {(instAddress || instContact || teacherName) && (
-          <div className="letterhead-footer">
-            <strong>{instName}</strong>
-            {instAddress && <> | Address: {instAddress}</>}
-            {instContact && <> | Phone: {instContact}</>}
-            {teacherName && (
-              <>
-                {" "}
-                | Teacher: <strong>{teacherName}</strong>
-              </>
-            )}
-          </div>
         )}
       </div>
     </div>

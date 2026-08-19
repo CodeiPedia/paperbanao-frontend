@@ -136,7 +136,14 @@ h1, h2, h3 {
   font-size: 0.9rem;
 }
 
-/* --- Generated paper preview: matches the official letterhead design --- */
+/* --- Generated paper preview: matches the official letterhead design ---
+   Uses a real <table> with <thead>/<tbody>/<tfoot> so the footer reliably
+   repeats at the bottom of every physical printed page (this is a native
+   browser table-pagination behavior, much more reliable across browsers
+   than position:fixed, which is known to be inconsistent — especially in
+   Chrome — and can even overlap page content on pages 2+). The header
+   lives in the tbody instead, so it appears once at the top only, not
+   repeated per page, matching the official paper's layout. */
 .letterhead-page {
   background: white;
   border: 1px solid var(--paper-line);
@@ -144,12 +151,11 @@ h1, h2, h3 {
   box-shadow: 0 1px 3px rgba(23, 38, 61, 0.08), 0 4px 14px rgba(23, 38, 61, 0.06);
   padding: 20px;
   position: relative;
-  overflow: hidden;
   font-family: Georgia, "Lora", serif;
   color: var(--ink);
 }
 .letterhead-watermark {
-  position: absolute;
+  position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%) rotate(-45deg);
@@ -161,12 +167,9 @@ h1, h2, h3 {
   pointer-events: none;
   z-index: 0;
 }
-.letterhead-header, .letterhead-section-bar, .letterhead-topic-heading,
-.letterhead-instructions, .letterhead-content, .letterhead-answer-section,
-.letterhead-footer {
-  position: relative;
-  z-index: 1;
-}
+.letterhead-table { width: 100%; border-collapse: collapse; position: relative; z-index: 1; }
+.letterhead-table td { border: none; padding: 0; }
+.letterhead-answer-table { margin-top: 10px; }
 .letterhead-header-table { width: 100%; border-collapse: collapse; }
 .letterhead-header-table td { border: none; padding: 0; }
 .letterhead-brand-row { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 10px; }
@@ -191,11 +194,21 @@ h1, h2, h3 {
   print-color-adjust: exact;
   color-adjust: exact;
 }
+.letterhead-simple-header {
+  text-align: center;
+  font-weight: 900;
+  font-size: 16px;
+  text-transform: uppercase;
+  border-bottom: 2px solid var(--navy);
+  padding-bottom: 8px;
+  margin-bottom: 12px;
+}
 .letterhead-topic-heading {
   text-align: center;
   text-decoration: underline;
   text-transform: uppercase;
-  font-size: 15px;
+  font-size: 12px;
+  font-weight: 700;
   margin: 0 0 12px 0;
   border-bottom: 1px dashed var(--paper-line);
   padding-bottom: 8px;
@@ -208,29 +221,31 @@ h1, h2, h3 {
   font-size: 13px;
 }
 .letterhead-content { text-align: justify; }
-.letterhead-question { padding: 0.5rem 0; line-height: 1.7; white-space: pre-wrap; }
-.letterhead-answer-section { margin-top: 10px; }
-.letterhead-answer-heading { break-before: page; page-break-before: always; padding-top: 20px; }
+.letterhead-question { padding: 0.5rem 0; line-height: 1.7; white-space: pre-wrap; break-inside: avoid; }
+.letterhead-answer-heading { padding-top: 8px; }
 .letterhead-footer {
-  margin-top: 20px;
   padding-top: 10px;
   border-top: 2px dashed #bbb;
   text-align: center;
   font-size: 12px;
   color: #444;
   font-family: Arial, sans-serif;
+  background: white;
 }
 
-/* Print: hide everything on the page except the paper preview, which
-   takes over the full page. This uses the browser's own native print/PDF
-   engine (via window.print()) instead of generating a PDF on the server —
-   the browser already has correct fonts installed for any script (Hindi,
-   English, etc.), sidestepping font-embedding issues entirely. */
 @media print {
   body * { visibility: hidden; }
   .print-area, .print-area * { visibility: visible; }
   .print-area { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 0; }
   .letterhead-page { box-shadow: none; border: none; border-radius: 0; padding: 10mm; }
+  .letterhead-answer-table { break-before: page; page-break-before: always; margin-top: 0; }
+  /* Repeats the footer at the bottom of every physical printed page this
+     table spans — a native browser table-pagination feature. */
+  .letterhead-tfoot { display: table-footer-group; }
+  /* Two-column question layout on paper, like the original exam format —
+     kept screen-only single-column above so small/mobile screens stay
+     readable; this only kicks in for the actual printed page (A4-width). */
+  .letterhead-content { column-count: 2; column-gap: 15mm; column-rule: 1px solid #000; font-size: 13px; }
   @page { size: A4; margin: 0; }
 }
 
