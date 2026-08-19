@@ -1,19 +1,35 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Navbar from "@/components/Navbar";
-import { api, downloadBlob } from "@/lib/api";
+import { api } from "@/lib/api";
 import PaperPreview from "@/components/PaperPreview";
 import { useToast } from "@/context/ToastContext";
 
 export default function DigitizePage() {
+  const [institution, setInstitution] = useState(null);
+
+  useEffect(() => {
+    api.getInstitutionDefaults()
+      .then((d) => setInstitution({
+        name: d.default_inst_name,
+        address: d.default_inst_address,
+        contact: d.default_inst_contact,
+        teacherName: d.default_teacher_name,
+        logoBase64: d.default_logo_base64,
+        logoMimetype: d.default_logo_mimetype,
+        customInstructions: d.default_custom_instructions,
+        readingTime: d.default_reading_time,
+      }))
+      .catch(() => {});
+  }, []);
+
   const [files, setFiles] = useState([]);
   const [subject, setSubject] = useState("");
   const [className, setClassName] = useState("");
   const [blocks, setBlocks] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [exporting, setExporting] = useState("");
   const { showToast } = useToast();
 
   const handleDigitize = async (e) => {
@@ -36,23 +52,6 @@ export default function DigitizePage() {
 
   const updateBlock = (i, text) => {
     setBlocks((prev) => prev.map((b, idx) => (idx === i ? text : b)));
-  };
-
-  const handleExport = async (fmt) => {
-    setExporting(fmt);
-    try {
-      const { blob, filename } = await api.exportPaper(fmt, {
-        content: blocks.join("\n\n"),
-        subject: subject || "Digitized Paper",
-        class_name: className,
-      });
-      downloadBlob(blob, filename);
-      showToast(`${fmt.toUpperCase()} downloaded.`, "success");
-    } catch (err) {
-      showToast(err.message, "error");
-    } finally {
-      setExporting("");
-    }
   };
 
   const handleSaveHistory = async () => {
@@ -105,26 +104,19 @@ export default function DigitizePage() {
 
         {blocks.length > 0 && (
           <div className="mt-6 space-y-3">
-            <div className="flex items-center justify-between flex-wrap gap-2">
+            <div className="flex items-center justify-between flex-wrap gap-2 no-print">
               <h2 className="text-xl">Your Digitized Paper</h2>
               <div className="flex gap-2">
-                <button onClick={() => handleExport("html")} disabled={!!exporting} className="rounded border border-slate-300 bg-white px-3 py-1.5 text-sm hover:bg-slate-50">
-                  {exporting === "html" ? "..." : "🖨️ HTML"}
-                </button>
-                <button onClick={() => handleExport("docx")} disabled={!!exporting} className="rounded border border-slate-300 bg-white px-3 py-1.5 text-sm hover:bg-slate-50">
-                  {exporting === "docx" ? "..." : "📄 Word"}
-                </button>
-                <button onClick={() => handleExport("pdf")} disabled={!!exporting} className="rounded border border-slate-300 bg-white px-3 py-1.5 text-sm hover:bg-slate-50">
-                  {exporting === "pdf" ? "..." : "📕 PDF"}
+                <button onClick={() => window.print()} className="rounded border border-slate-300 bg-white px-3 py-1.5 text-sm hover:bg-slate-50">
+                  🖨️ Print / Save as PDF
                 </button>
                 <button onClick={handleSaveHistory} className="btn-primary px-4 py-2 text-sm">
                   ☁️ Save to History
                 </button>
               </div>
             </div>
-            {/* save/export feedback now shown via toast */}
 
-            <details className="card">
+            <details className="card no-print">
               <summary className="cursor-pointer text-sm font-medium text-[#17263D]">🛠️ Review &amp; Edit questions</summary>
               <div className="mt-3 space-y-3">
                 {blocks.map((b, i) => (
@@ -139,7 +131,16 @@ export default function DigitizePage() {
               </div>
             </details>
 
-            <PaperPreview blocks={blocks} subject={subject || "Digitized Paper"} className={className} marks="" examTime="" />
+            <PaperPreview
+              blocks={blocks}
+              subject={subject || "Digitized Paper"}
+              className={className}
+              marks=""
+              examTime=""
+              institution={institution}
+              customInstructions={institution?.customInstructions || ""}
+              readingTime={institution?.readingTime || ""}
+            />
           </div>
         )}
       </main>

@@ -136,62 +136,102 @@ h1, h2, h3 {
   font-size: 0.9rem;
 }
 
-/* --- Generated paper preview: looks like an actual exam sheet --- */
-.paper-sheet {
+/* --- Generated paper preview: matches the official letterhead design --- */
+.letterhead-page {
   background: white;
   border: 1px solid var(--paper-line);
   border-radius: 4px;
   box-shadow: 0 1px 3px rgba(23, 38, 61, 0.08), 0 4px 14px rgba(23, 38, 61, 0.06);
-  padding: 2rem 2.2rem;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
   font-family: Georgia, "Lora", serif;
   color: var(--ink);
-  background-image: repeating-linear-gradient(
-    to bottom,
-    transparent,
-    transparent 33px,
-    var(--paper-line) 34px
-  );
-  background-position: 0 3.4rem;
 }
-.paper-sheet-header {
-  text-align: center;
-  border-bottom: 2px solid var(--navy);
-  padding-bottom: 0.9rem;
-  margin-bottom: 1.3rem;
-}
-.paper-sheet-header .subject {
-  font-size: 1.3rem;
-  font-weight: 700;
-  color: var(--navy);
-}
-.paper-sheet-header .meta {
-  font-family: "IBM Plex Mono", monospace;
-  font-size: 0.8rem;
-  color: var(--ink-soft);
-  margin-top: 0.3rem;
-}
-.paper-question {
-  padding: 0.55rem 0;
-  line-height: 1.7;
-  white-space: pre-wrap;
-}
-.answer-key-divider {
-  margin: 1.5rem 0 1rem 0;
-  text-align: center;
-  font-family: "IBM Plex Mono", monospace;
-  font-size: 0.78rem;
-  letter-spacing: 0.08em;
+.letterhead-watermark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-45deg);
+  font-size: 60px;
+  font-weight: 900;
   text-transform: uppercase;
-  color: var(--amber);
-  border-top: 1px dashed var(--paper-line);
-  padding-top: 1rem;
+  color: rgba(23, 38, 61, 0.05);
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 0;
 }
-.answer-key-question {
-  padding: 0.4rem 0;
-  line-height: 1.6;
-  white-space: pre-wrap;
-  color: var(--ink-soft);
-  font-size: 0.95rem;
+.letterhead-header, .letterhead-section-bar, .letterhead-topic-heading,
+.letterhead-instructions, .letterhead-content, .letterhead-answer-section,
+.letterhead-footer {
+  position: relative;
+  z-index: 1;
+}
+.letterhead-header-table { width: 100%; border-collapse: collapse; }
+.letterhead-header-table td { border: none; padding: 0; }
+.letterhead-brand-row { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 10px; }
+.letterhead-logo { height: 40px; width: auto; }
+.letterhead-name { margin: 0; font-size: 22px; font-weight: 900; text-transform: uppercase; color: var(--navy); white-space: nowrap; }
+.letterhead-meta-row td { border-top: 2px solid var(--navy); padding-top: 8px; font-weight: bold; font-size: 12px; vertical-align: bottom; }
+.letterhead-meta-left { text-align: left; width: 33%; }
+.letterhead-meta-center { text-align: center; width: 34%; vertical-align: middle !important; }
+.letterhead-meta-right { text-align: right; width: 33%; }
+.letterhead-badge { display: inline-block; border: 2px solid var(--navy); border-radius: 12px; padding: 4px 20px; font-size: 12px; }
+.letterhead-section-bar {
+  background: var(--navy);
+  color: white;
+  text-align: center;
+  font-weight: bold;
+  font-size: 13px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 6px;
+  margin: 12px 0;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+  color-adjust: exact;
+}
+.letterhead-topic-heading {
+  text-align: center;
+  text-decoration: underline;
+  text-transform: uppercase;
+  font-size: 15px;
+  margin: 0 0 12px 0;
+  border-bottom: 1px dashed var(--paper-line);
+  padding-bottom: 8px;
+}
+.letterhead-instructions {
+  border: 1px solid #999;
+  background: #fafafa;
+  padding: 8px 12px;
+  margin-bottom: 12px;
+  font-size: 13px;
+}
+.letterhead-content { text-align: justify; }
+.letterhead-question { padding: 0.5rem 0; line-height: 1.7; white-space: pre-wrap; }
+.letterhead-answer-section { margin-top: 10px; }
+.letterhead-answer-heading { break-before: page; page-break-before: always; padding-top: 20px; }
+.letterhead-footer {
+  margin-top: 20px;
+  padding-top: 10px;
+  border-top: 2px dashed #bbb;
+  text-align: center;
+  font-size: 12px;
+  color: #444;
+  font-family: Arial, sans-serif;
+}
+
+/* Print: hide everything on the page except the paper preview, which
+   takes over the full page. This uses the browser's own native print/PDF
+   engine (via window.print()) instead of generating a PDF on the server —
+   the browser already has correct fonts installed for any script (Hindi,
+   English, etc.), sidestepping font-embedding issues entirely. */
+@media print {
+  body * { visibility: hidden; }
+  .print-area, .print-area * { visibility: visible; }
+  .print-area { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 0; }
+  .letterhead-page { box-shadow: none; border: none; border-radius: 0; padding: 10mm; }
+  @page { size: A4; margin: 0; }
 }
 
 /* --- Toast notifications --- */

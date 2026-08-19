@@ -1,15 +1,32 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Navbar from "@/components/Navbar";
 import CurriculumPicker from "@/components/CurriculumPicker";
 import QuestionTypeGrid, { DEFAULT_QUESTION_CONFIG } from "@/components/QuestionTypeGrid";
 import PaperPreview from "@/components/PaperPreview";
 import EditableQuestionList from "@/components/EditableQuestionList";
-import { api, downloadBlob } from "@/lib/api";
+import { api } from "@/lib/api";
 import { useToast } from "@/context/ToastContext";
 
 export default function BsebBoardPage() {
+  const [institution, setInstitution] = useState(null);
+
+  useEffect(() => {
+    api.getInstitutionDefaults()
+      .then((d) => setInstitution({
+        name: d.default_inst_name,
+        address: d.default_inst_address,
+        contact: d.default_inst_contact,
+        teacherName: d.default_teacher_name,
+        logoBase64: d.default_logo_base64,
+        logoMimetype: d.default_logo_mimetype,
+        customInstructions: d.default_custom_instructions,
+        readingTime: d.default_reading_time,
+      }))
+      .catch(() => {});
+  }, []);
+
   const [curriculumTopics, setCurriculumTopics] = useState("");
   const [specificTopics, setSpecificTopics] = useState("");
   const [subject, setSubject] = useState("");
@@ -21,7 +38,6 @@ export default function BsebBoardPage() {
   const [blocks, setBlocks] = useState([]);
   const [usedTopics, setUsedTopics] = useState("");
   const [loading, setLoading] = useState(false);
-  const [exporting, setExporting] = useState("");
   const { showToast } = useToast();
 
   const handleSelectionChange = (selClass, selSubjects) => {
@@ -60,26 +76,6 @@ export default function BsebBoardPage() {
       showToast(err.message, "error");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleExport = async (fmt) => {
-    setExporting(fmt);
-    try {
-      const { blob, filename } = await api.exportPaper(fmt, {
-        content: blocks.join("\n\n"),
-        subject: subject || "BSEB Paper",
-        class_name: className,
-        marks: String(totalMarks),
-        exam_time: "2 Hours",
-        topics: usedTopics,
-      });
-      downloadBlob(blob, filename);
-      showToast(`${fmt.toUpperCase()} downloaded.`, "success");
-    } catch (err) {
-      showToast(err.message, "error");
-    } finally {
-      setExporting("");
     }
   };
 
@@ -152,25 +148,31 @@ export default function BsebBoardPage() {
 
         {blocks.length > 0 && (
           <div className="mt-6 space-y-3">
-            <div className="flex items-center justify-between flex-wrap gap-2">
+            <div className="flex items-center justify-between flex-wrap gap-2 no-print">
               <h2 className="text-xl">Generated Paper</h2>
               <div className="flex gap-2">
-                <button onClick={() => handleExport("html")} disabled={!!exporting} className="rounded border border-slate-300 bg-white px-3 py-1.5 text-sm hover:bg-slate-50">
-                  {exporting === "html" ? "..." : "🖨️ HTML"}
-                </button>
-                <button onClick={() => handleExport("docx")} disabled={!!exporting} className="rounded border border-slate-300 bg-white px-3 py-1.5 text-sm hover:bg-slate-50">
-                  {exporting === "docx" ? "..." : "📄 Word"}
-                </button>
-                <button onClick={() => handleExport("pdf")} disabled={!!exporting} className="rounded border border-slate-300 bg-white px-3 py-1.5 text-sm hover:bg-slate-50">
-                  {exporting === "pdf" ? "..." : "📕 PDF"}
+                <button onClick={() => window.print()} className="rounded border border-slate-300 bg-white px-3 py-1.5 text-sm hover:bg-slate-50">
+                  🖨️ Print / Save as PDF
                 </button>
                 <button onClick={handleSaveHistory} className="btn-primary px-4 py-2 text-sm">
                   ☁️ Save to History
                 </button>
               </div>
             </div>
-            <EditableQuestionList blocks={blocks} setBlocks={setBlocks} subject={subject} topics={usedTopics} />
-            <PaperPreview blocks={blocks} subject={subject} className={className} marks={String(totalMarks)} examTime="2 Hours" />
+            <div className="no-print">
+              <EditableQuestionList blocks={blocks} setBlocks={setBlocks} subject={subject} topics={usedTopics} />
+            </div>
+            <PaperPreview
+              blocks={blocks}
+              subject={subject}
+              className={className}
+              marks={String(totalMarks)}
+              examTime="2 Hours"
+              topics={usedTopics}
+              institution={institution}
+              customInstructions={institution?.customInstructions || ""}
+              readingTime={institution?.readingTime || ""}
+            />
           </div>
         )}
       </main>
