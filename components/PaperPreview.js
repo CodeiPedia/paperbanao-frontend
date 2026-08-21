@@ -24,6 +24,14 @@ function formatTopicHeading(topics, subject) {
   return parts.join("; ").toUpperCase();
 }
 
+// If className already starts with "Class" (e.g. "Class 10", from a
+// dropdown), strip that prefix before display — the "Class :" label is
+// added separately, so otherwise it would print as "Class : Class 10".
+function formatClassName(className) {
+  const trimmed = (className || "").trim();
+  return trimmed.replace(/^class\s*/i, "").trim();
+}
+
 function Letterhead({ instName, logoSrc, className, examTime, readingTime, marks, subject }) {
   return (
     <div className="letterhead-header">
@@ -39,7 +47,7 @@ function Letterhead({ instName, logoSrc, className, examTime, readingTime, marks
           </tr>
           <tr className="letterhead-meta-row">
             <td className="letterhead-meta-left">
-              Class : {className || "—"}
+              Class : {formatClassName(className) || "—"}
               <br />
               Time : {examTime || "2 Hours"}
               {readingTime ? ` (+ ${readingTime} reading time)` : ""}
