@@ -161,6 +161,13 @@ export default function LandingPageClient() {
           <Logo size={22} />
           <span>PaperBanao</span>
         </div>
+        <div className="mb-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs">
+          <Link href="/about" className="hover:text-white">About Us</Link>
+          <Link href="/contact" className="hover:text-white">Contact Us</Link>
+          <Link href="/terms" className="hover:text-white">Terms &amp; Conditions</Link>
+          <Link href="/privacy" className="hover:text-white">Privacy Policy</Link>
+          <Link href="/refund" className="hover:text-white">Refund Policy</Link>
+        </div>
         © {new Date().getFullYear()} PaperBanao. Made in India, for India.
       </footer>
     </div>
