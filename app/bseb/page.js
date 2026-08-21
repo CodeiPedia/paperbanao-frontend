@@ -32,6 +32,7 @@ export default function BsebBoardPage() {
   const [subject, setSubject] = useState("");
   const [className, setClassName] = useState("");
   const [language, setLanguage] = useState("English");
+  const [examTime, setExamTime] = useState("2 Hours");
   const [includeAnswerKey, setIncludeAnswerKey] = useState(true);
   const [config, setConfig] = useState(DEFAULT_QUESTION_CONFIG);
 
@@ -118,7 +119,7 @@ export default function BsebBoardPage() {
 
           <div className="card">
             <h2 className="mb-3 text-base font-semibold text-[#17263D]">3. Language &amp; Answer Key</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
                 <label className="mb-1 block text-sm font-medium">Language</label>
                 <select className="input-field" value={language} onChange={(e) => setLanguage(e.target.value)}>
@@ -126,6 +127,10 @@ export default function BsebBoardPage() {
                   <option>Hindi</option>
                   <option>Bilingual</option>
                 </select>
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium">Time</label>
+                <input className="input-field" value={examTime} onChange={(e) => setExamTime(e.target.value)} placeholder="e.g. 2 Hours" />
               </div>
               <div className="flex items-end">
                 <label className="flex items-center gap-2 text-sm">
@@ -167,7 +172,7 @@ export default function BsebBoardPage() {
               subject={subject}
               className={className}
               marks={String(totalMarks)}
-              examTime="2 Hours"
+              examTime={examTime}
               topics={usedTopics}
               institution={institution}
               customInstructions={institution?.customInstructions || ""}

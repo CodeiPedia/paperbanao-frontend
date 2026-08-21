@@ -32,6 +32,7 @@ export default function DashboardPage() {
   const [className, setClassName] = useState("");
   const [topics, setTopics] = useState("");
   const [language, setLanguage] = useState("English");
+  const [examTime, setExamTime] = useState("2 Hours");
   const [includeAnswerKey, setIncludeAnswerKey] = useState(true);
   const [config, setConfig] = useState(DEFAULT_QUESTION_CONFIG);
 
@@ -190,7 +191,7 @@ export default function DashboardPage() {
             <textarea className="input-field" rows={2} value={topics} onChange={(e) => setTopics(e.target.value)} />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
               <label className="mb-1 block text-sm font-medium">Language</label>
               <select className="input-field" value={language} onChange={(e) => setLanguage(e.target.value)}>
@@ -198,6 +199,10 @@ export default function DashboardPage() {
                 <option>Hindi</option>
                 <option>Bilingual</option>
               </select>
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium">Time</label>
+              <input className="input-field" value={examTime} onChange={(e) => setExamTime(e.target.value)} placeholder="e.g. 2 Hours" />
             </div>
             <div className="flex items-end">
               <label className="flex items-center gap-2 text-sm">
@@ -237,7 +242,7 @@ export default function DashboardPage() {
               subject={subject}
               className={className}
               marks={String(["mcq", "fib", "true_false", "short_answer", "long_answer"].reduce((sum, key) => sum + (config[key]?.count || 0) * (config[key]?.marks || 0), 0))}
-              examTime="2 Hours"
+              examTime={examTime}
               topics={usedTopics}
               institution={institution}
               customInstructions={institution?.customInstructions || ""}
