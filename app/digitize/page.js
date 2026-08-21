@@ -28,6 +28,7 @@ export default function DigitizePage() {
   const [subject, setSubject] = useState("");
   const [className, setClassName] = useState("");
   const [examTime, setExamTime] = useState("2 Hours");
+  const [marks, setMarks] = useState("");
   const [blocks, setBlocks] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -85,7 +86,7 @@ export default function DigitizePage() {
               className="file-input-btn"
             />
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div>
               <label className="mb-1 block text-sm font-medium">Subject</label>
               <input className="input-field" value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="e.g. Mathematics" />
@@ -97,6 +98,10 @@ export default function DigitizePage() {
             <div>
               <label className="mb-1 block text-sm font-medium">Time</label>
               <input className="input-field" value={examTime} onChange={(e) => setExamTime(e.target.value)} placeholder="e.g. 2 Hours" />
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium">Marks</label>
+              <input className="input-field" value={marks} onChange={(e) => setMarks(e.target.value)} placeholder="e.g. 50" />
             </div>
           </div>
 
@@ -140,7 +145,7 @@ export default function DigitizePage() {
               blocks={blocks}
               subject={subject || "Digitized Paper"}
               className={className}
-              marks=""
+              marks={marks}
               examTime={examTime}
               institution={institution}
               customInstructions={institution?.customInstructions || ""}
