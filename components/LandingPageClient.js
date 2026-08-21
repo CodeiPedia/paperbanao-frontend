@@ -161,7 +161,7 @@ export default function LandingPageClient() {
           <Logo size={22} />
           <span>PaperBanao</span>
         </div>
-        © {new Date().getFullYear()} PaperBanao. Made in Bihar, for Bihar.
+        © {new Date().getFullYear()} PaperBanao. Made in India, for India.
       </footer>
     </div>
   );
