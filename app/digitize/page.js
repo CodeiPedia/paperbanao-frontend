@@ -1,12 +1,16 @@
 "use client";
 import { useState, useEffect } from "react";
-import ProtectedRoute from "@/components/ProtectedRoute";
+import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import { api } from "@/lib/api";
 import PaperPreview from "@/components/PaperPreview";
+import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
+import { savePendingForm, loadPendingForm } from "@/lib/formPersist";
 
 export default function DigitizePage() {
+  const { isAuthed } = useAuth();
+  const router = useRouter();
   const [institution, setInstitution] = useState(null);
 
   useEffect(() => {
@@ -34,6 +38,21 @@ export default function DigitizePage() {
   const [error, setError] = useState("");
   const { showToast } = useToast();
 
+  // Photos themselves can't survive a redirect (browser File objects
+  // aren't something we can stash in sessionStorage) — so only the text
+  // fields are restored here, and the person is told to re-pick photos.
+  useEffect(() => {
+    const pending = loadPendingForm("digitize");
+    if (!pending) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- restoring saved form state after a signup/login redirect, standard one-time pattern
+    setSubject(pending.subject ?? "");
+    setClassName(pending.className ?? "");
+    setExamTime(pending.examTime ?? "2 Hours");
+    setMarks(pending.marks ?? "");
+    showToast("You're back! Please re-select your photo(s) to continue.", "success");
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- runs once on mount to check for restored state
+  }, []);
+
   const handleDigitize = async (e) => {
     e.preventDefault();
     setError("");
@@ -41,6 +60,13 @@ export default function DigitizePage() {
       setError("Please upload at least one photo of the paper.");
       return;
     }
+
+    if (!isAuthed) {
+      savePendingForm("digitize", { subject, className, examTime, marks });
+      router.push(`/signup?redirect=${encodeURIComponent("/digitize")}`);
+      return;
+    }
+
     setLoading(true);
     try {
       const data = await api.digitize(files);
@@ -66,7 +92,7 @@ export default function DigitizePage() {
   };
 
   return (
-    <ProtectedRoute>
+    <>
       <Navbar />
       <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-8">
         <div className="eyebrow mb-1">Handwritten → Digital</div>
@@ -154,6 +180,6 @@ export default function DigitizePage() {
           </div>
         )}
       </main>
-    </ProtectedRoute>
+    </>
   );
 }

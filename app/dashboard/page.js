@@ -1,15 +1,19 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import ProtectedRoute from "@/components/ProtectedRoute";
+import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import QuestionTypeGrid, { DEFAULT_QUESTION_CONFIG } from "@/components/QuestionTypeGrid";
 import PaperPreview from "@/components/PaperPreview";
 import EditableQuestionList from "@/components/EditableQuestionList";
 import { api } from "@/lib/api";
+import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
+import { savePendingForm, loadPendingForm } from "@/lib/formPersist";
 
 export default function DashboardPage() {
+  const { isAuthed } = useAuth();
+  const router = useRouter();
   const [institution, setInstitution] = useState(null);
 
   useEffect(() => {
@@ -47,6 +51,25 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // If we just came back from signup/login after clicking "Generate"
+  // while browsing without an account, restore what was filled in so the
+  // person doesn't have to start over.
+  useEffect(() => {
+    const pending = loadPendingForm("dashboard");
+    if (!pending) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- restoring saved form state after a signup/login redirect, standard one-time pattern
+    setMethod(pending.method ?? "quick");
+    setSubject(pending.subject ?? "");
+    setClassName(pending.className ?? "");
+    setTopics(pending.topics ?? "");
+    setLanguage(pending.language ?? "English");
+    setExamTime(pending.examTime ?? "2 Hours");
+    setIncludeAnswerKey(pending.includeAnswerKey ?? true);
+    setConfig(pending.config ?? DEFAULT_QUESTION_CONFIG);
+    setExtractedText(pending.extractedText ?? "");
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- runs once on mount to check for restored state
+  }, []);
+
   const handleExtractPdf = async () => {
     if (!pdfFile) {
       setExtractError("Please choose a PDF first.");
@@ -72,6 +95,15 @@ export default function DashboardPage() {
 
     if (method === "pdf" && !extractedText.trim()) {
       setError("Please extract text from your PDF before generating.");
+      return;
+    }
+
+    if (!isAuthed) {
+      savePendingForm("dashboard", {
+        method, subject, className, topics, language, examTime,
+        includeAnswerKey, config, extractedText,
+      });
+      router.push(`/signup?redirect=${encodeURIComponent("/dashboard")}`);
       return;
     }
 
@@ -115,7 +147,7 @@ export default function DashboardPage() {
 
 
   return (
-    <ProtectedRoute>
+    <>
       <Navbar />
       <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-8">
         <div className="eyebrow mb-1">Create</div>
@@ -251,6 +283,6 @@ export default function DashboardPage() {
           </div>
         )}
       </main>
-    </ProtectedRoute>
+    </>
   );
 }

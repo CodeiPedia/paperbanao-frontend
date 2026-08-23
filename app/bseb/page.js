@@ -1,15 +1,19 @@
 "use client";
 import { useState, useEffect } from "react";
-import ProtectedRoute from "@/components/ProtectedRoute";
+import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import CurriculumPicker from "@/components/CurriculumPicker";
 import QuestionTypeGrid, { DEFAULT_QUESTION_CONFIG } from "@/components/QuestionTypeGrid";
 import PaperPreview from "@/components/PaperPreview";
 import EditableQuestionList from "@/components/EditableQuestionList";
 import { api } from "@/lib/api";
+import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
+import { savePendingForm, loadPendingForm } from "@/lib/formPersist";
 
 export default function BsebBoardPage() {
+  const { isAuthed } = useAuth();
+  const router = useRouter();
   const [institution, setInstitution] = useState(null);
 
   useEffect(() => {
@@ -41,6 +45,21 @@ export default function BsebBoardPage() {
   const [loading, setLoading] = useState(false);
   const { showToast } = useToast();
 
+  useEffect(() => {
+    const pending = loadPendingForm("bseb");
+    if (!pending) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- restoring saved form state after a signup/login redirect, standard one-time pattern
+    setCurriculumTopics(pending.curriculumTopics ?? "");
+    setSpecificTopics(pending.specificTopics ?? "");
+    setSubject(pending.subject ?? "");
+    setClassName(pending.className ?? "");
+    setLanguage(pending.language ?? "English");
+    setExamTime(pending.examTime ?? "2 Hours");
+    setIncludeAnswerKey(pending.includeAnswerKey ?? true);
+    setConfig(pending.config ?? DEFAULT_QUESTION_CONFIG);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- runs once on mount to check for restored state
+  }, []);
+
   const handleSelectionChange = (selClass, selSubjects) => {
     setClassName(selClass);
     setSubject(selSubjects.join(", "));
@@ -55,6 +74,16 @@ export default function BsebBoardPage() {
       showToast("Please select at least one chapter, or add specific topics.", "error");
       return;
     }
+
+    if (!isAuthed) {
+      savePendingForm("bseb", {
+        curriculumTopics, specificTopics, subject, className, language,
+        examTime, includeAnswerKey, config,
+      });
+      router.push(`/signup?redirect=${encodeURIComponent("/bseb")}`);
+      return;
+    }
+
     const finalTopics = [curriculumTopics, specificTopics].filter(Boolean).join(", ");
     setLoading(true);
     try {
@@ -90,7 +119,7 @@ export default function BsebBoardPage() {
   };
 
   return (
-    <ProtectedRoute>
+    <>
       <Navbar />
       <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-8">
         <div className="eyebrow mb-1">Syllabus-based</div>
@@ -181,6 +210,6 @@ export default function BsebBoardPage() {
           </div>
         )}
       </main>
-    </ProtectedRoute>
+    </>
   );
 }
