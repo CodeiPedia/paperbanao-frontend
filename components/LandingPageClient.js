@@ -32,6 +32,7 @@ export default function LandingPageClient() {
             Paper<span>Banao</span>
           </Link>
           <nav className="flex items-center gap-4 text-sm">
+            <Link href="/dashboard" className="hidden text-slate-600 hover:text-[#17263D] sm:inline">Explore</Link>
             <Link href="/login" className="text-slate-600 hover:text-[#17263D]">Log in</Link>
             <Link href="/signup" className="btn-primary px-4 py-2 text-sm">Try Free</Link>
           </nav>
@@ -54,6 +55,9 @@ export default function LandingPageClient() {
             <Link href="/signup" className="btn-primary">Try PaperBanao Free</Link>
             <Link href="#pricing" className="btn-secondary">See Pricing</Link>
           </div>
+          <Link href="/dashboard" className="mt-3 inline-block text-sm text-amber-700 hover:underline">
+            Or explore the tool first, no signup needed →
+          </Link>
         </div>
       </section>
 
