@@ -97,7 +97,23 @@ export default function PaperPreview({
 }) {
   const answerKeyIndex = blocks.findIndex((b) => b.toUpperCase().includes("ANSWER KEY"));
   const questionBlocks = answerKeyIndex === -1 ? blocks : blocks.slice(0, answerKeyIndex);
-  const answerBlocks = answerKeyIndex === -1 ? [] : blocks.slice(answerKeyIndex + 1);
+  // The block containing "ANSWER KEY" sometimes also contains the very
+  // first answer (e.g. the AI writes "# ANSWER KEY\nQ1. (c) ...\n" as one
+  // combined block instead of putting the header on its own line separated
+  // by |||). Simply skipping this whole block would silently drop Q1's
+  // answer — so strip out just the header line(s) and keep any remaining
+  // text as the first answer entry.
+  let answerBlocks = [];
+  if (answerKeyIndex !== -1) {
+    const markerBlock = blocks[answerKeyIndex];
+    const afterHeader = markerBlock
+      .split("\n")
+      .filter((line) => !line.toUpperCase().includes("ANSWER KEY"))
+      .join("\n")
+      .trim();
+    const remainingBlocks = blocks.slice(answerKeyIndex + 1);
+    answerBlocks = afterHeader ? [afterHeader, ...remainingBlocks] : remainingBlocks;
+  }
 
   const instName = institution?.name || "PaperBanao";
   const instAddress = institution?.address || "";
