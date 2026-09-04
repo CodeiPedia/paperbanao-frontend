@@ -1,215 +1,77 @@
-"use client";
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import Navbar from "@/components/Navbar";
-import CurriculumPicker from "@/components/CurriculumPicker";
-import QuestionTypeGrid, { DEFAULT_QUESTION_CONFIG } from "@/components/QuestionTypeGrid";
-import PaperPreview from "@/components/PaperPreview";
-import EditableQuestionList from "@/components/EditableQuestionList";
-import { api } from "@/lib/api";
-import { useAuth } from "@/context/AuthContext";
-import { useToast } from "@/context/ToastContext";
-import { savePendingForm, loadPendingForm } from "@/lib/formPersist";
+import BsebPageClient from "@/components/BsebPageClient";
 
-export default function BsebBoardPage() {
-  const { isAuthed } = useAuth();
-  const router = useRouter();
-  const [institution, setInstitution] = useState(null);
+export const metadata = {
+  title: "BSEB Question Paper Generator — Bihar Board Exam Papers in Minutes",
+  description:
+    "Generate BSEB (Bihar Board) question papers strictly from the NCERT syllabus — pick class, subject, and chapters, then get MCQs, short/long answers, and an answer key in Hindi or English. Free to try.",
+  keywords: [
+    "BSEB question paper generator",
+    "Bihar board question paper generator",
+    "BSEB model paper maker",
+    "Bihar board exam paper generator",
+    "BSEB NCERT question paper",
+  ],
+  alternates: {
+    canonical: "https://paperbanao.in/bseb",
+  },
+  openGraph: {
+    title: "BSEB Question Paper Generator — Bihar Board Exam Papers in Minutes",
+    description:
+      "Build BSEB/NCERT-syllabus question papers in minutes, with answer keys, in Hindi or English.",
+    url: "https://paperbanao.in/bseb",
+    siteName: "PaperBanao",
+    locale: "en_IN",
+    type: "website",
+  },
+};
 
-  useEffect(() => {
-    api.getInstitutionDefaults()
-      .then((d) => setInstitution({
-        name: d.default_inst_name,
-        address: d.default_inst_address,
-        contact: d.default_inst_contact,
-        teacherName: d.default_teacher_name,
-        logoBase64: d.default_logo_base64,
-        logoMimetype: d.default_logo_mimetype,
-        customInstructions: d.default_custom_instructions,
-        readingTime: d.default_reading_time,
-      }))
-      .catch(() => {});
-  }, []);
+const faqStructuredData = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: [
+    {
+      "@type": "Question",
+      name: "Does this follow the BSEB syllabus exactly?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Yes — every question is generated strictly from the class, subject, and chapters you select from the saved BSEB/NCERT syllabus, so nothing outside those chapters appears in the paper.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "Can I generate question papers in Hindi?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Yes. Choose Hindi, English, or Bilingual — the paper, including the answer key, is generated in your chosen language.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "Is this BSEB question paper generator free?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Yes, the first 5 question papers are free with no card required. After that, Pro unlocks unlimited papers for 30 days for a one-time ₹99 payment.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "Can I add my school's letterhead and logo?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Yes — set your institute name, address, contact, and logo once in Settings, and every paper you generate is automatically formatted with your own letterhead.",
+      },
+    },
+  ],
+};
 
-  const [curriculumTopics, setCurriculumTopics] = useState("");
-  const [specificTopics, setSpecificTopics] = useState("");
-  const [subject, setSubject] = useState("");
-  const [className, setClassName] = useState("");
-  const [language, setLanguage] = useState("English");
-  const [examTime, setExamTime] = useState("2 Hours");
-  const [includeAnswerKey, setIncludeAnswerKey] = useState(true);
-  const [config, setConfig] = useState(DEFAULT_QUESTION_CONFIG);
-
-  const [blocks, setBlocks] = useState([]);
-  const [usedTopics, setUsedTopics] = useState("");
-  const [loading, setLoading] = useState(false);
-  const { showToast } = useToast();
-
-  useEffect(() => {
-    const pending = loadPendingForm("bseb");
-    if (!pending) return;
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- restoring saved form state after a signup/login redirect, standard one-time pattern
-    setCurriculumTopics(pending.curriculumTopics ?? "");
-    setSpecificTopics(pending.specificTopics ?? "");
-    setSubject(pending.subject ?? "");
-    setClassName(pending.className ?? "");
-    setLanguage(pending.language ?? "English");
-    setExamTime(pending.examTime ?? "2 Hours");
-    setIncludeAnswerKey(pending.includeAnswerKey ?? true);
-    setConfig(pending.config ?? DEFAULT_QUESTION_CONFIG);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- runs once on mount to check for restored state
-  }, []);
-
-  const handleSelectionChange = (selClass, selSubjects) => {
-    setClassName(selClass);
-    setSubject(selSubjects.join(", "));
-  };
-
-  const totalMarks = ["mcq", "fib", "true_false", "short_answer", "long_answer"]
-    .reduce((sum, key) => sum + (config[key]?.count || 0) * (config[key]?.marks || 0), 0);
-
-  const handleGenerate = async (e) => {
-    e.preventDefault();
-    if (!curriculumTopics && !specificTopics.trim()) {
-      showToast("Please select at least one chapter, or add specific topics.", "error");
-      return;
-    }
-
-    if (!isAuthed) {
-      savePendingForm("bseb", {
-        curriculumTopics, specificTopics, subject, className, language,
-        examTime, includeAnswerKey, config,
-      });
-      router.push(`/signup?redirect=${encodeURIComponent("/bseb")}`);
-      return;
-    }
-
-    const finalTopics = [curriculumTopics, specificTopics].filter(Boolean).join(", ");
-    setLoading(true);
-    try {
-      const payload = {
-        subject: subject || "BSEB Paper",
-        class_name: className,
-        topics: finalTopics,
-        language,
-        include_answer_key: includeAnswerKey,
-        mcq: config.mcq,
-        fib: config.fib,
-        true_false: config.true_false,
-        short_answer: config.short_answer,
-        long_answer: config.long_answer,
-      };
-      const data = await api.generatePaper(payload);
-      setBlocks(data.blocks);
-      setUsedTopics(finalTopics);
-    } catch (err) {
-      showToast(err.message, "error");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSaveHistory = async () => {
-    try {
-      await api.savePaper({ subject: subject || "BSEB Paper", board: "BSEB", content: blocks.join("\n\n") });
-      showToast("Saved to history!", "success");
-    } catch (err) {
-      showToast(err.message, "error");
-    }
-  };
-
+export default function Page() {
   return (
     <>
-      <Navbar />
-      <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-8">
-        <div className="eyebrow mb-1">Syllabus-based</div>
-        <h1 className="mb-2 text-2xl">🎓 Bihar Board (BSEB/NCERT) Paper Builder</h1>
-        <p className="mb-6 text-sm text-slate-500">
-          Pick class, subject(s), and chapters from your saved syllabus list — then set question types and marks.
-          Tip: set Board Pattern to &quot;BSEB (Bihar Board)&quot; in Settings for BSEB-style formatting.
-        </p>
-
-        <form onSubmit={handleGenerate} className="space-y-6">
-          <div className="card">
-            <h2 className="mb-3 text-base font-semibold text-[#17263D]">1. Class &amp; Subjects</h2>
-            <CurriculumPicker onTopicsChange={setCurriculumTopics} onSelectionChange={handleSelectionChange} />
-            {(className || subject) && (
-              <p className="mt-3 text-xs text-slate-500">
-                📄 Paper header will show: <strong>{subject || "—"}</strong>, <strong>{className || "—"}</strong>
-              </p>
-            )}
-          </div>
-
-          <div className="card">
-            <h2 className="mb-3 text-base font-semibold text-[#17263D]">2. Specific Topics (optional)</h2>
-            <p className="mb-2 text-xs text-slate-400">Narrow it down further within the chosen chapters, if needed.</p>
-            <textarea className="input-field" rows={2} value={specificTopics} onChange={(e) => setSpecificTopics(e.target.value)} />
-          </div>
-
-          <div className="card">
-            <h2 className="mb-3 text-base font-semibold text-[#17263D]">3. Language &amp; Answer Key</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div>
-                <label className="mb-1 block text-sm font-medium">Language</label>
-                <select className="input-field" value={language} onChange={(e) => setLanguage(e.target.value)}>
-                  <option>English</option>
-                  <option>Hindi</option>
-                  <option>Bilingual</option>
-                </select>
-              </div>
-              <div>
-                <label className="mb-1 block text-sm font-medium">Time</label>
-                <input className="input-field" value={examTime} onChange={(e) => setExamTime(e.target.value)} placeholder="e.g. 2 Hours" />
-              </div>
-              <div className="flex items-end">
-                <label className="flex items-center gap-2 text-sm">
-                  <input type="checkbox" checked={includeAnswerKey} onChange={(e) => setIncludeAnswerKey(e.target.checked)} />
-                  Include Answer Key
-                </label>
-              </div>
-            </div>
-          </div>
-
-          <div className="card">
-            <h2 className="mb-3 text-base font-semibold text-[#17263D]">4. Counts &amp; Marks</h2>
-            <QuestionTypeGrid config={config} setConfig={setConfig} />
-          </div>
-
-          <button type="submit" disabled={loading} className="btn-primary w-full">
-            {loading ? "Generating..." : "🚀 Generate BSEB Paper"}
-          </button>
-        </form>
-
-        {blocks.length > 0 && (
-          <div className="mt-6 space-y-3">
-            <div className="flex items-center justify-between flex-wrap gap-2 no-print">
-              <h2 className="text-xl">Generated Paper</h2>
-              <div className="flex gap-2">
-                <button onClick={() => window.print()} className="rounded border border-slate-300 bg-white px-3 py-1.5 text-sm hover:bg-slate-50">
-                  🖨️ Print / Save as PDF
-                </button>
-                <button onClick={handleSaveHistory} className="btn-primary px-4 py-2 text-sm">
-                  ☁️ Save to History
-                </button>
-              </div>
-            </div>
-            <div className="no-print">
-              <EditableQuestionList blocks={blocks} setBlocks={setBlocks} subject={subject} topics={usedTopics} />
-            </div>
-            <PaperPreview
-              blocks={blocks}
-              subject={subject}
-              className={className}
-              marks={String(totalMarks)}
-              examTime={examTime}
-              topics={usedTopics}
-              institution={institution}
-              customInstructions={institution?.customInstructions || ""}
-              readingTime={institution?.readingTime || ""}
-            />
-          </div>
-        )}
-      </main>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqStructuredData) }}
+      />
+      <BsebPageClient />
     </>
   );
 }
