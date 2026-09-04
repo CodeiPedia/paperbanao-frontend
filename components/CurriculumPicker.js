@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 
-export default function CurriculumPicker({ onTopicsChange, onSelectionChange }) {
+export default function CurriculumPicker({ onTopicsChange, onSelectionChange, onFullSyllabusChange }) {
   const [classes, setClasses] = useState([]);
   const [selectedClass, setSelectedClass] = useState("");
   const [subjects, setSubjects] = useState([]);
@@ -47,6 +47,20 @@ export default function CurriculumPicker({ onTopicsChange, onSelectionChange }) 
   useEffect(() => {
     if (onSelectionChange) onSelectionChange(selectedClass, selectedSubjects);
   }, [selectedClass, selectedSubjects]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // "Full syllabus" means every selected subject has ALL of its available
+  // chapters selected — used to show a clean "FULL TEST" heading on the
+  // generated paper instead of an unwieldy list of every chapter name.
+  useEffect(() => {
+    const isFullSyllabus =
+      selectedSubjects.length > 0 &&
+      selectedSubjects.every((subj) => {
+        const available = chaptersBySubject[subj] || [];
+        const selected = selectedChapters[subj] || [];
+        return available.length > 0 && selected.length === available.length;
+      });
+    if (onFullSyllabusChange) onFullSyllabusChange(isFullSyllabus);
+  }, [selectedChapters, selectedSubjects, chaptersBySubject]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const addSubject = () => {
     const trimmed = newSubject.trim();

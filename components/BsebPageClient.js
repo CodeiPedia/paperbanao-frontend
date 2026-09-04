@@ -43,6 +43,8 @@ export default function BsebPageClient() {
   const [blocks, setBlocks] = useState([]);
   const [diagrams, setDiagrams] = useState({});
   const [usedTopics, setUsedTopics] = useState("");
+  const [isFullSyllabus, setIsFullSyllabus] = useState(false);
+  const [generatedIsFullSyllabus, setGeneratedIsFullSyllabus] = useState(false);
   const [loading, setLoading] = useState(false);
   const { showToast } = useToast();
 
@@ -104,6 +106,7 @@ export default function BsebPageClient() {
       setBlocks(data.blocks);
       setDiagrams(data.diagrams || {});
       setUsedTopics(finalTopics);
+      setGeneratedIsFullSyllabus(isFullSyllabus);
     } catch (err) {
       showToast(err.message, "error");
     } finally {
@@ -137,7 +140,7 @@ export default function BsebPageClient() {
         <form onSubmit={handleGenerate} className="space-y-6">
           <div className="card">
             <h2 className="mb-3 text-base font-semibold text-[#17263D]">1. Class &amp; Subjects</h2>
-            <CurriculumPicker onTopicsChange={setCurriculumTopics} onSelectionChange={handleSelectionChange} />
+            <CurriculumPicker onTopicsChange={setCurriculumTopics} onSelectionChange={handleSelectionChange} onFullSyllabusChange={setIsFullSyllabus} />
             {(className || subject) && (
               <p className="mt-3 text-xs text-slate-500">
                 📄 Paper header will show: <strong>{subject || "—"}</strong>, <strong>{className || "—"}</strong>
@@ -212,6 +215,7 @@ export default function BsebPageClient() {
               customInstructions={institution?.customInstructions || ""}
               readingTime={institution?.readingTime || ""}
               diagrams={diagrams}
+              isFullSyllabus={generatedIsFullSyllabus}
             />
           </div>
         )}

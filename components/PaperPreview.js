@@ -1,19 +1,49 @@
 "use client";
 
-// Converts **bold** markdown-style text into real <strong> tags, since the
-// blocks come back as plain text with light markdown formatting from the AI.
-function renderInline(text) {
-  const parts = text.split(/\*\*(.*?)\*\*/g);
-  return parts.map((part, i) =>
-    i % 2 === 1 ? <strong key={i}>{part}</strong> : <span key={i}>{part}</span>
-  );
+// Converts **bold** markdown-style text into real <strong> tags, and
+// {{DIAGRAM:id}} markers (inserted by the backend where the AI requested
+// a diagram) into actual <img> tags, since the blocks come back as plain
+// text with this light formatting from the AI/backend.
+function renderInline(text, diagrams = {}) {
+  const pattern = /\*\*(.*?)\*\*|\{\{DIAGRAM:(\w+)\}\}/g;
+  const result = [];
+  let lastIndex = 0;
+  let match;
+  let key = 0;
+
+  while ((match = pattern.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      result.push(<span key={key++}>{text.slice(lastIndex, match.index)}</span>);
+    }
+    if (match[1] !== undefined) {
+      result.push(<strong key={key++}>{match[1]}</strong>);
+    } else if (match[2] !== undefined) {
+      const imgData = diagrams[match[2]];
+      if (imgData) {
+        result.push(
+          <img
+            key={key++}
+            src={`data:image/png;base64,${imgData}`}
+            alt="Diagram"
+            className="letterhead-diagram-image"
+          />
+        );
+      }
+    }
+    lastIndex = pattern.lastIndex;
+  }
+  if (lastIndex < text.length) {
+    result.push(<span key={key++}>{text.slice(lastIndex)}</span>);
+  }
+  return result;
 }
 
 // Topics from the BSEB curriculum picker come formatted like
 // "Subject: Chapter A; Subject: Chapter B" (one "Subject: " prefix per
 // chapter, repeated). For the printed heading we only want the chapter
 // names, not the subject repeated in front of every single one.
-function formatTopicHeading(topics, subject) {
+function formatTopicHeading(topics, subject, isFullSyllabus) {
+  if (isFullSyllabus) return "FULL TEST";
   const raw = (topics || subject || "").trim();
   if (!raw) return "";
   const parts = raw.split(";").map((part) => {
@@ -94,6 +124,8 @@ export default function PaperPreview({
   institution = null, // { name, address, contact, teacherName, logoBase64, logoMimetype }
   customInstructions = "",
   readingTime = "",
+  diagrams = {}, // { diagram_1: base64PngData, ... } — from the generate/regenerate API response
+  isFullSyllabus = false, // true when every chapter of every selected subject was picked (BSEB full-syllabus mode)
 }) {
   const answerKeyIndex = blocks.findIndex((b) => b.toUpperCase().includes("ANSWER KEY"));
   const questionBlocks = answerKeyIndex === -1 ? blocks : blocks.slice(0, answerKeyIndex);
@@ -124,7 +156,7 @@ export default function PaperPreview({
       ? `data:${institution.logoMimetype};base64,${institution.logoBase64}`
       : null;
 
-  const topicHeading = formatTopicHeading(topics, subject);
+  const topicHeading = formatTopicHeading(topics, subject, isFullSyllabus);
   const footerProps = { instName, instAddress, instContact, teacherName };
 
   return (
@@ -160,7 +192,7 @@ export default function PaperPreview({
                 <div className="letterhead-content">
                   {questionBlocks.map((b, i) => (
                     <div key={i} className="letterhead-question">
-                      {renderInline(b)}
+                      {renderInline(b, diagrams)}
                     </div>
                   ))}
                 </div>
@@ -186,7 +218,7 @@ export default function PaperPreview({
                   <div className="letterhead-content">
                     {answerBlocks.map((b, i) => (
                       <div key={i} className="letterhead-question">
-                        {renderInline(b)}
+                        {renderInline(b, diagrams)}
                       </div>
                     ))}
                   </div>
