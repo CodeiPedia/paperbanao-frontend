@@ -64,6 +64,14 @@ export default function CurriculumPicker({ onTopicsChange, onSelectionChange }) 
     });
   };
 
+  const selectAllChapters = (subj) => {
+    setSelectedChapters((prev) => ({ ...prev, [subj]: [...(chaptersBySubject[subj] || [])] }));
+  };
+
+  const clearAllChapters = (subj) => {
+    setSelectedChapters((prev) => ({ ...prev, [subj]: [] }));
+  };
+
   const saveChapters = async (subj) => {
     const newOnes = (newChaptersText[subj] || "").split(",").map((c) => c.trim()).filter(Boolean);
     if (newOnes.length === 0) return;
@@ -122,7 +130,28 @@ export default function CurriculumPicker({ onTopicsChange, onSelectionChange }) 
 
       {selectedSubjects.map((subj) => (
         <div key={subj} className="card">
-          <h3 className="mb-2 text-base">📖 {subj} — chapters</h3>
+          <div className="mb-2 flex items-center justify-between">
+            <h3 className="text-base">📖 {subj} — chapters</h3>
+            {(chaptersBySubject[subj] || []).length > 0 && (
+              <div className="flex gap-2 text-xs">
+                <button type="button" onClick={() => selectAllChapters(subj)} className="text-amber-700 hover:underline">
+                  Select all
+                </button>
+                <span className="text-slate-300">|</span>
+                <button type="button" onClick={() => clearAllChapters(subj)} className="text-slate-500 hover:underline">
+                  Clear
+                </button>
+              </div>
+            )}
+          </div>
+          {(chaptersBySubject[subj] || []).length > 0 &&
+            (selectedChapters[subj] || []).length === (chaptersBySubject[subj] || []).length && (
+              <p className="mb-2 text-xs text-slate-400">
+                📝 All chapters selected — this will generate a full-syllabus practice paper covering every
+                chapter, spread as evenly as possible. (Not a guaranteed exact replica of any official board
+                paper&apos;s mark distribution.)
+              </p>
+          )}
           <div className="mb-3 flex flex-wrap gap-2">
             {(chaptersBySubject[subj] || []).map((ch) => {
               const active = (selectedChapters[subj] || []).includes(ch);
