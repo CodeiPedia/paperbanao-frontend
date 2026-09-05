@@ -77,9 +77,9 @@ export default function LandingPageClient() {
             <p className="text-sm text-slate-500">Photograph a handwritten paper and get a clean, formatted digital version.</p>
           </div>
           <div className="feature-card">
-            <div className="f-icon">🔄</div>
-            <h3 className="mb-1 text-base">Edit &amp; Regenerate</h3>
-            <p className="text-sm text-slate-500">Don&apos;t like a question? Regenerate just that one, answer key stays in sync.</p>
+            <div className="f-icon">🎯</div>
+            <h3 className="mb-1 text-base">Strictly On-Syllabus</h3>
+            <p className="text-sm text-slate-500">No hallucinated or off-syllabus questions — every question comes only from the exact chapters you select.</p>
           </div>
           <div className="feature-card">
             <div className="f-icon">🏫</div>
@@ -134,14 +134,15 @@ export default function LandingPageClient() {
             <p className="text-sm text-slate-500">5 question papers to try, no card required.</p>
           </div>
           <div className="plan-card pro">
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <span className="tag">Pro — 30 Days</span>
               <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-bold text-amber-700">50% OFF</span>
+              <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-bold text-emerald-700">No Auto-Renewal</span>
             </div>
             <div className="price">
               ₹99 <span className="text-lg text-slate-400 line-through">₹199</span> <span className="text-base text-slate-500">/ 30 days</span>
             </div>
-            <p className="text-sm text-slate-500">Unlimited papers for 30 days. One-time payment.</p>
+            <p className="text-sm text-slate-500">Unlimited papers for 30 days. One-time payment — pay again only if you want to.</p>
             <p className="mt-1 text-xs italic text-slate-400">Cheaper than a pizza. 🍕</p>
           </div>
         </div>
