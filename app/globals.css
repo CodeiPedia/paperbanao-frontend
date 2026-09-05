@@ -231,6 +231,7 @@ h1, h2, h3 {
 }
 .letterhead-content { text-align: justify; }
 .letterhead-question { padding: 0.5rem 0; line-height: 1.7; white-space: pre-wrap; break-inside: avoid; }
+.letterhead-diagram-image { display: block; max-width: 220px; width: 100%; height: auto; margin: 8px 0; }
 .letterhead-answer-heading { padding-top: 8px; }
 .letterhead-footer {
   padding-top: 10px;

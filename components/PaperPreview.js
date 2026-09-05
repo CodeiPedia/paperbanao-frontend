@@ -42,8 +42,7 @@ function renderInline(text, diagrams = {}) {
 // "Subject: Chapter A; Subject: Chapter B" (one "Subject: " prefix per
 // chapter, repeated). For the printed heading we only want the chapter
 // names, not the subject repeated in front of every single one.
-function formatTopicHeading(topics, subject, isFullSyllabus) {
-  if (isFullSyllabus) return "FULL TEST";
+function formatTopicHeading(topics, subject) {
   const raw = (topics || subject || "").trim();
   if (!raw) return "";
   const parts = raw.split(";").map((part) => {
@@ -125,7 +124,6 @@ export default function PaperPreview({
   customInstructions = "",
   readingTime = "",
   diagrams = {}, // { diagram_1: base64PngData, ... } — from the generate/regenerate API response
-  isFullSyllabus = false, // true when every chapter of every selected subject was picked (BSEB full-syllabus mode)
 }) {
   const answerKeyIndex = blocks.findIndex((b) => b.toUpperCase().includes("ANSWER KEY"));
   const questionBlocks = answerKeyIndex === -1 ? blocks : blocks.slice(0, answerKeyIndex);
@@ -156,7 +154,7 @@ export default function PaperPreview({
       ? `data:${institution.logoMimetype};base64,${institution.logoBase64}`
       : null;
 
-  const topicHeading = formatTopicHeading(topics, subject, isFullSyllabus);
+  const topicHeading = formatTopicHeading(topics, subject);
   const footerProps = { instName, instAddress, instContact, teacherName };
 
   return (

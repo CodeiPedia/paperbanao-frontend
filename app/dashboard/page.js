@@ -48,6 +48,7 @@ export default function DashboardPage() {
   const [extractError, setExtractError] = useState("");
 
   const [blocks, setBlocks] = useState([]);
+  const [diagrams, setDiagrams] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -126,6 +127,7 @@ export default function DashboardPage() {
       };
       const data = await api.generatePaper(payload);
       setBlocks(data.blocks);
+      setDiagrams(data.diagrams || {});
       setUsedTopics(method === "pdf" ? topics : finalTopics);
     } catch (err) {
       setError(err.message);
@@ -267,7 +269,7 @@ export default function DashboardPage() {
               </div>
             </div>
             <div className="no-print">
-              <EditableQuestionList blocks={blocks} setBlocks={setBlocks} subject={subject} topics={usedTopics} />
+              <EditableQuestionList blocks={blocks} setBlocks={setBlocks} subject={subject} topics={usedTopics} diagrams={diagrams} setDiagrams={setDiagrams} />
             </div>
             <PaperPreview
               blocks={blocks}
@@ -279,6 +281,7 @@ export default function DashboardPage() {
               institution={institution}
               customInstructions={institution?.customInstructions || ""}
               readingTime={institution?.readingTime || ""}
+              diagrams={diagrams}
             />
           </div>
         )}

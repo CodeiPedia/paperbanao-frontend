@@ -10,7 +10,7 @@ function extractQuestionNumber(text) {
   return null;
 }
 
-export default function EditableQuestionList({ blocks, setBlocks, subject, topics }) {
+export default function EditableQuestionList({ blocks, setBlocks, subject, topics, diagrams = {}, setDiagrams }) {
   const [regeneratingIndex, setRegeneratingIndex] = useState(null);
   const [error, setError] = useState("");
 
@@ -47,6 +47,13 @@ export default function EditableQuestionList({ blocks, setBlocks, subject, topic
         }
       }
       setBlocks(newBlocks);
+
+      // If the regenerated question came with a new diagram, merge it in —
+      // its marker id (e.g. "diagram_1") is scoped to this one response,
+      // so it's safe to just add it alongside any existing diagrams.
+      if (data.diagrams && Object.keys(data.diagrams).length > 0 && setDiagrams) {
+        setDiagrams((prev) => ({ ...prev, ...data.diagrams }));
+      }
     } catch (err) {
       setError(err.message);
     } finally {
@@ -64,12 +71,19 @@ export default function EditableQuestionList({ blocks, setBlocks, subject, topic
       <div className="space-y-3">
         {blocks.map((b, i) => (
           <div key={i} className="flex flex-col gap-2 sm:flex-row sm:items-start">
-            <textarea
-              className="input-field flex-1"
-              rows={3}
-              value={b}
-              onChange={(e) => updateBlock(i, e.target.value)}
-            />
+            <div className="flex-1">
+              <textarea
+                className="input-field w-full"
+                rows={3}
+                value={b}
+                onChange={(e) => updateBlock(i, e.target.value)}
+              />
+              {b.includes("{{DIAGRAM:") && (
+                <p className="mt-1 text-xs text-slate-400">
+                  📊 This question includes a diagram — keep the {"{{DIAGRAM:...}}"} marker if you want to keep it.
+                </p>
+              )}
+            </div>
             {!isInAnswerKeySection(i) && (
               <button
                 type="button"
