@@ -1,6 +1,7 @@
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 import { ToastProvider } from "@/context/ToastContext";
+import SupportChatWidget from "@/components/SupportChatWidget";
 
 export const metadata = {
   metadataBase: new URL("https://paperbanao.in"),
@@ -21,6 +22,7 @@ export default function RootLayout({ children }) {
         <ToastProvider>
           <AuthProvider>{children}</AuthProvider>
         </ToastProvider>
+        <SupportChatWidget />
       </body>
     </html>
   );
