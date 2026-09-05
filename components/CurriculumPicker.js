@@ -9,6 +9,7 @@ export default function CurriculumPicker({ onTopicsChange, onSelectionChange, on
   const [selectedSubjects, setSelectedSubjects] = useState([]);
   const [newSubject, setNewSubject] = useState("");
   const [chaptersBySubject, setChaptersBySubject] = useState({});
+  const [weightageBySubject, setWeightageBySubject] = useState({});
   const [selectedChapters, setSelectedChapters] = useState({});
   const [newChaptersText, setNewChaptersText] = useState({});
   const [saveStatus, setSaveStatus] = useState({});
@@ -31,6 +32,13 @@ export default function CurriculumPicker({ onTopicsChange, onSelectionChange, on
       if (!(subj in chaptersBySubject)) {
         api.getChapters(selectedClass, subj).then((chs) => {
           setChaptersBySubject((prev) => ({ ...prev, [subj]: chs }));
+        }).catch(() => {});
+        // Exam-pattern weightage data — currently only researched for a
+        // few subject/class combinations (see backend app/exam_weightage.py).
+        // Returns an empty object for anything not yet researched, which
+        // is fine — the UI just shows no badges in that case.
+        api.getWeightage(selectedClass, subj).then((w) => {
+          setWeightageBySubject((prev) => ({ ...prev, [subj]: w }));
         }).catch(() => {});
       }
     });
@@ -158,6 +166,11 @@ export default function CurriculumPicker({ onTopicsChange, onSelectionChange, on
               </div>
             )}
           </div>
+          {Object.values(weightageBySubject[subj] || {}).some((w) => w.priority === "high") && (
+            <p className="mb-2 text-xs text-slate-400">
+              ⭐ = high-weightage chapter in the BSEB exam pattern (hover a chapter for details).
+            </p>
+          )}
           {(chaptersBySubject[subj] || []).length > 0 &&
             (selectedChapters[subj] || []).length === (chaptersBySubject[subj] || []).length && (
               <p className="mb-2 text-xs text-slate-400">
@@ -169,16 +182,19 @@ export default function CurriculumPicker({ onTopicsChange, onSelectionChange, on
           <div className="mb-3 flex flex-wrap gap-2">
             {(chaptersBySubject[subj] || []).map((ch) => {
               const active = (selectedChapters[subj] || []).includes(ch);
+              const weightage = (weightageBySubject[subj] || {})[ch];
               return (
                 <button
                   type="button"
                   key={ch}
                   onClick={() => toggleChapter(subj, ch)}
+                  title={weightage ? `${weightage.unit} — ~${weightage.unit_marks} marks in the BSEB exam` : undefined}
                   className={`rounded-full border px-3 py-1 text-xs ${
                     active ? "border-amber-500 bg-amber-100 text-amber-800" : "border-slate-300 text-slate-600"
                   }`}
                 >
                   {ch}
+                  {weightage?.priority === "high" && <span className="ml-1" aria-label="High weightage chapter">⭐</span>}
                 </button>
               );
             })}
