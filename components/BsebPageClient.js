@@ -25,6 +25,9 @@ export default function BsebPageClient() {
         teacherName: d.default_teacher_name,
         logoBase64: d.default_logo_base64,
         logoMimetype: d.default_logo_mimetype,
+        logoPlacement: d.default_logo_placement || "left",
+        headingFont: d.default_heading_font || "serif",
+        headingSize: d.default_heading_size || "medium",
         customInstructions: d.default_custom_instructions,
         readingTime: d.default_reading_time,
       }))

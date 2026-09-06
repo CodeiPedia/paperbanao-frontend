@@ -42,7 +42,8 @@ function renderInline(text, diagrams = {}) {
 // "Subject: Chapter A; Subject: Chapter B" (one "Subject: " prefix per
 // chapter, repeated). For the printed heading we only want the chapter
 // names, not the subject repeated in front of every single one.
-function formatTopicHeading(topics, subject) {
+function formatTopicHeading(topics, subject, isFullSyllabus) {
+  if (isFullSyllabus) return "FULL TEST";
   const raw = (topics || subject || "").trim();
   if (!raw) return "";
   const parts = raw.split(";").map((part) => {
@@ -61,17 +62,43 @@ function formatClassName(className) {
   return trimmed.replace(/^class\s*/i, "").trim();
 }
 
-function Letterhead({ instName, logoSrc, className, examTime, readingTime, marks, subject }) {
+function Letterhead({ instName, logoSrc, className, examTime, readingTime, marks, subject, logoPlacement = "left", headingFont = "serif", headingSize = "medium" }) {
+  const nameEl = (
+    <h1 className={`letterhead-name letterhead-font-${headingFont} letterhead-size-${headingSize}`}>{instName}</h1>
+  );
+  const logoEl = logoSrc && <img src={logoSrc} alt="" className="letterhead-logo" />;
+
+  let brandRow;
+  if (logoPlacement === "above") {
+    brandRow = (
+      <div className="letterhead-brand-row letterhead-brand-above">
+        {logoEl}
+        {nameEl}
+      </div>
+    );
+  } else if (logoPlacement === "right") {
+    brandRow = (
+      <div className="letterhead-brand-row">
+        {nameEl}
+        {logoEl}
+      </div>
+    );
+  } else {
+    brandRow = (
+      <div className="letterhead-brand-row">
+        {logoEl}
+        {nameEl}
+      </div>
+    );
+  }
+
   return (
     <div className="letterhead-header">
       <table className="letterhead-header-table">
         <tbody>
           <tr>
             <td colSpan={3} style={{ textAlign: "center" }}>
-              <div className="letterhead-brand-row">
-                {logoSrc && <img src={logoSrc} alt="" className="letterhead-logo" />}
-                <h1 className="letterhead-name">{instName}</h1>
-              </div>
+              {brandRow}
             </td>
           </tr>
           <tr className="letterhead-meta-row">
@@ -124,6 +151,7 @@ export default function PaperPreview({
   customInstructions = "",
   readingTime = "",
   diagrams = {}, // { diagram_1: base64PngData, ... } — from the generate/regenerate API response
+  isFullSyllabus = false, // true when every chapter of every selected subject was picked (BSEB full-syllabus mode)
 }) {
   const answerKeyIndex = blocks.findIndex((b) => b.toUpperCase().includes("ANSWER KEY"));
   const questionBlocks = answerKeyIndex === -1 ? blocks : blocks.slice(0, answerKeyIndex);
@@ -154,7 +182,7 @@ export default function PaperPreview({
       ? `data:${institution.logoMimetype};base64,${institution.logoBase64}`
       : null;
 
-  const topicHeading = formatTopicHeading(topics, subject);
+  const topicHeading = formatTopicHeading(topics, subject, isFullSyllabus);
   const footerProps = { instName, instAddress, instContact, teacherName };
 
   return (
@@ -179,6 +207,9 @@ export default function PaperPreview({
                   readingTime={readingTime}
                   marks={marks}
                   subject={subject}
+                  logoPlacement={institution?.logoPlacement || "left"}
+                  headingFont={institution?.headingFont || "serif"}
+                  headingSize={institution?.headingSize || "medium"}
                 />
                 <div className="letterhead-section-bar">MULTIPLE CHOICE QUESTIONS &amp; THEORY</div>
                 {topicHeading && <h2 className="letterhead-topic-heading">{topicHeading}</h2>}
@@ -211,7 +242,7 @@ export default function PaperPreview({
             <tbody>
               <tr>
                 <td>
-                  <div className="letterhead-simple-header">{instName}</div>
+                  <div className={`letterhead-simple-header letterhead-font-${institution?.headingFont || "serif"} letterhead-size-${institution?.headingSize || "medium"}`}>{instName}</div>
                   <h2 className="letterhead-topic-heading letterhead-answer-heading">ANSWER KEY</h2>
                   <div className="letterhead-content">
                     {answerBlocks.map((b, i) => (

@@ -15,6 +15,9 @@ export default function InstitutionSettingsPage() {
   const [boardFormat, setBoardFormat] = useState("Standard");
   const [customInstructions, setCustomInstructions] = useState("");
   const [readingTime, setReadingTime] = useState("");
+  const [logoPlacement, setLogoPlacement] = useState("left");
+  const [headingFont, setHeadingFont] = useState("serif");
+  const [headingSize, setHeadingSize] = useState("medium");
   const [logoFile, setLogoFile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -31,6 +34,9 @@ export default function InstitutionSettingsPage() {
         setBoardFormat(d.default_board_format || "Standard");
         setCustomInstructions(d.default_custom_instructions || "");
         setReadingTime(d.default_reading_time || "");
+        setLogoPlacement(d.default_logo_placement || "left");
+        setHeadingFont(d.default_heading_font || "serif");
+        setHeadingSize(d.default_heading_size || "medium");
       })
       .catch(() => {})
       .finally(() => setLoading(false));
@@ -49,6 +55,9 @@ export default function InstitutionSettingsPage() {
       formData.append("board_format", boardFormat);
       formData.append("custom_instructions", customInstructions);
       formData.append("reading_time", readingTime);
+      formData.append("logo_placement", logoPlacement);
+      formData.append("heading_font", headingFont);
+      formData.append("heading_size", headingSize);
       if (logoFile) formData.append("logo", logoFile);
 
       await api.saveInstitutionDefaults(formData);
@@ -120,6 +129,37 @@ export default function InstitutionSettingsPage() {
                 className="file-input-btn"
               />
               <p className="mt-1 text-xs text-slate-400">Leave empty to keep your current saved logo.</p>
+            </div>
+
+            <div className="border-t border-slate-200 pt-4">
+              <h2 className="mb-1 text-base font-semibold text-[#17263D]">Header Style</h2>
+              <p className="mb-3 text-xs text-slate-400">Choose how your logo and institute name look on generated papers.</p>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                  <label className="mb-1 block text-sm font-medium">Logo Placement</label>
+                  <select className="input-field" value={logoPlacement} onChange={(e) => setLogoPlacement(e.target.value)}>
+                    <option value="left">Left of name</option>
+                    <option value="right">Right of name</option>
+                    <option value="above">Above name</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-1 block text-sm font-medium">Heading Font</label>
+                  <select className="input-field" value={headingFont} onChange={(e) => setHeadingFont(e.target.value)}>
+                    <option value="serif">Classic Serif</option>
+                    <option value="sans">Modern Sans-serif</option>
+                    <option value="bold-display">Bold Display</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-1 block text-sm font-medium">Heading Size</label>
+                  <select className="input-field" value={headingSize} onChange={(e) => setHeadingSize(e.target.value)}>
+                    <option value="small">Small</option>
+                    <option value="medium">Medium</option>
+                    <option value="large">Large</option>
+                  </select>
+                </div>
+              </div>
             </div>
 
             <div className="border-t border-slate-200 pt-4">
